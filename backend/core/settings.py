@@ -25,6 +25,9 @@ SECRET_KEY = 'django-insecure-r2+t^213=ii66bbu60v0x3j1h47-54mhljw)p(dxxik^y0d2hi
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+
+AUTH_USER_MODEL = 'customUser.Users'
+
 ALLOWED_HOSTS = []
 
 
@@ -37,13 +40,44 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'album',
+    'customUser',
+    'song',
+    'rest_framework'
 ]
+
+
+
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:5173/'
+]
+CORS_ALLOW_METHODS = (
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+)
+CORS_ALLOW_HEADERS = (
+    # "accept",
+    "authorization",
+    "content-type",
+    # "user-agent",
+    # "x-csrftoken",
+    # "x-requested-with",
+    # 'access_token',
+    'RefreshToken',
+)
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -77,6 +111,13 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+
+        # 'ENGINE': 'django.db.backends.mysql', 
+        # 'NAME': 'BLOGPOST',
+        # 'USER': 'mrvishope',
+        # 'PASSWORD': 'password',
+        # 'HOST': 'localhost', 
+        # 'PORT': '3306',
     }
 }
 
@@ -121,3 +162,12 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ]
+}
+
