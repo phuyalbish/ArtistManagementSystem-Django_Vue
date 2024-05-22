@@ -1,7 +1,7 @@
 import django
-from .models import Album
+from .models import Music
 from django.views.decorators.csrf import csrf_exempt
-from .serializers import AlbumSerializer
+from .serializers import MusicSerializer
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -9,13 +9,13 @@ from rest_framework import status
 
 
 def enable_disable(func):
-    def wrapper(request, albumid):
+    def wrapper(request, musicid):
         try:
-            user = Album.objects.get(id=albumid)
-        except Album.DoesNotExist:
-            return Response({"msg": "Album not found"}, status=status.HTTP_404_NOT_FOUND)
-        toggledata = func(request, albumid)
-        serializer = AlbumSerializer(instance=user, data=toggledata, partial=True)
+            user = Music.objects.get(id=musicid)
+        except Music.DoesNotExist:
+            return Response({"msg": "Music not found"}, status=status.HTTP_404_NOT_FOUND)
+        toggledata = func(request, musicid)
+        serializer = MusicSerializer(instance=user, data=toggledata, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -26,21 +26,21 @@ def enable_disable(func):
 @api_view(['GET'])
 def get(request):
     try:
-        datas = list(Album.objects.values().filter(is_deleted=False, is_superuser=False))
-        serializer = AlbumSerializer(datas, many=True)
+        datas = list(Music.objects.values().filter(is_deleted=False, is_superuser=False))
+        serializer = MusicSerializer(datas, many=True)
     except:
-        return Response({"detail":"No Album Found"}, status=404)
+        return Response({"detail":"No Music Found"}, status=404)
     return Response(serializer.data)
     
 
 
 @api_view(['GET'])
-def getUser(request,albumid):
+def getUser(request,musicid):
     try:
-        data = Album.objects.values().get(pk=albumid, is_deleted=False, is_superuser=False)
-        serializer = AlbumSerializer(data, many=False)
+        data = Music.objects.values().get(pk=musicid, is_deleted=False, is_superuser=False)
+        serializer = MusicSerializer(data, many=False)
     except:
-        return Response({"detail":"No Album Found"}, status=404)
+        return Response({"detail":"No Music Found"}, status=404)
     return Response(serializer.data)
 
 
@@ -50,7 +50,7 @@ def getUser(request,albumid):
 @api_view(['POST'])
 def add(request):
     
-    serializer = AlbumSerializer(data=request.data)
+    serializer = MusicSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data)
@@ -61,12 +61,12 @@ def add(request):
 
 @csrf_exempt
 @api_view(['PATCH'])
-def edit(request,albumid):
+def edit(request,musicid):
     try:
-        user = Album.objects.get(id=albumid)
-    except Album.DoesNotExist:
-        return Response({"detail": "Album not found"}, status=status.HTTP_404_NOT_FOUND)
-    serializer = AlbumSerializer(instance=user, data=request.data, partial=True)
+        user = Music.objects.get(id=musicid)
+    except Music.DoesNotExist:
+        return Response({"msg": "Music not found"}, status=status.HTTP_404_NOT_FOUND)
+    serializer = MusicSerializer(instance=user, data=request.data, partial=True)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -75,24 +75,24 @@ def edit(request,albumid):
 @csrf_exempt
 @api_view(['PATCH'])
 @enable_disable
-def delete(request,albumid):
+def delete(request,musicid):
     return {"is_deleted": True}
 
 
 @csrf_exempt
 @api_view(['PATCH'])
 @enable_disable
-def restore(request,albumid):
+def restore(request,musicid):
     return {"is_deleted": False}
 
 @csrf_exempt
 @api_view(['PATCH'])
 @enable_disable
-def hide_album(request,albumid):
+def hide_music(request,musicid):
     return {"is_hidden": True}
 
 @csrf_exempt
 @api_view(['PATCH'])
 @enable_disable
-def show_album(request,albumid):
+def show_music(request,musicid):
     return {"is_hidden": False}

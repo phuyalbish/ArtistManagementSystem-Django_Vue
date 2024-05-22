@@ -23,17 +23,17 @@ class  Users(AbstractBaseUser, PermissionsMixin):
     is_deleted = models.BooleanField(default=False)
     is_disabled = models.BooleanField(default=False)
     is_artist = models.BooleanField(default=False)
+    is_admin = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     is_active = None
+
     objects = UserManager()
+
+    admin = 
 
     USERNAME_FIELD = 'email'
 
     REQUIRED_FIELD = []
-
-    # def create_user(self, email, password, **extra_fields):
-    #     self.objects.create_user(email=email, password=password, **extra_fields)
-
 
     def __str__(self):  
         return self.email

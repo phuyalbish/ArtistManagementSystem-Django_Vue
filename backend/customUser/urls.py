@@ -14,12 +14,16 @@ urlpatterns = [
 
     # User CRUD
     path('user/get/', views.get, name="get"),
-    path('user/get/<int:id>/', views.getUser, name="getUser"),
+    path('user/get/<int:userid>/', views.getUser, name="getUser"),
     path('user/add/', views.add, name="add"),
     path('user/edit/<int:userid>/', views.edit, name="edit"),
-    # path('user/delete/<int:id>/', views.delete, name="delete"),
-    # path('user/restore/<int:id>/', views.restore, name="restore"),
-    # path('user/disable/<int:id>/', views.restore, name="disable"),
-    # path('user/enable/<int:id>/', views.restore, name="enable"),
+    path('user/delete/<int:userid>/', views.delete, name="delete"),
+    path('user/restore/<int:userid>/', views.restore, name="restore"),
+    path('user/enable_user/<int:userid>/', views.enable_user, name="enable_user"),
+    path('user/disable_user/<int:userid>/', views.disable_user, name="disable_user"),
+    path('user/enable_artist/<int:userid>/', views.enable_artist, name="enable_artist"),
+    path('user/disable_artist/<int:userid>/', views.disable_artist, name="disable_artist"),
+    path('user/enable_admin/<int:userid>/', views.enable_admin, name="enable_admin"),
+    path('user/disable_admin/<int:userid>/', views.disable_admin, name="disable_admin"),
 
    ]

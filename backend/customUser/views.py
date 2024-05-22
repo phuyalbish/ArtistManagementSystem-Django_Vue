@@ -22,6 +22,24 @@ def getCSRFToken(request):
     return Response({'token': token})
 
 
+
+
+
+def enable_disable(func):
+    def wrapper(request, userid):
+        try:
+            user = Users.objects.get(id=userid)
+        except Users.DoesNotExist:
+            return Response({"msg": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        toggledata = func(request, userid)
+        serializer = UserSerializer(instance=user, data=toggledata, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    return wrapper
+
+
 @api_view(['GET'])
 def get(request):
     try:
@@ -34,9 +52,9 @@ def get(request):
 
 
 @api_view(['GET'])
-def getUser(request, **kwargs):
+def getUser(request,userid):
     try:
-        data = Users.objects.values().get(pk=kwargs.get("id"), is_deleted=False, is_superuser=False)
+        data = Users.objects.values().get(pk=userid, is_deleted=False, is_superuser=False)
         serializer = UserSerializer(data, many=False)
     except:
         return Response({"detail":"No User Found"}, status=404)
@@ -54,7 +72,7 @@ def add(request):
         serializer.save()
         return Response(serializer.data)
     else:
-        return Response({"detail":"Not Valid Input"}, status=422)
+        return Response(serializer.errors, status=422)
     
 
 
@@ -71,59 +89,50 @@ def edit(request,userid):
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@csrf_exempt
+@api_view(['PATCH'])
+@enable_disable
+def delete(request,userid):
+    return {"is_deleted": True}
 
 
 @csrf_exempt
 @api_view(['PATCH'])
-def delete(request,id):
-    try:
-        user = Users.objects.get(id=userid)
-    except Users.DoesNotExist:
-        return Response({"msg": "User not found"}, status=status.HTTP_404_NOT_FOUND)
-    deleteData={
-        "is_deleted":True
-    }
-    serializer = UserSerializer(instance=user, data=request.data, partial=True)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+@enable_disable
+def restore(request,userid):
+    return {"is_deleted": False}
 
-    
+@csrf_exempt
+@api_view(['PATCH'])
+@enable_disable
+def disable_user(request,userid):
+    return {"is_disabled": True}
 
-    
+@csrf_exempt
+@api_view(['PATCH'])
+@enable_disable
+def enable_user(request,userid):
+    return {"is_disabled": False}
 
 
-# @csrf_exempt
-# def delete(request, **kwargs):
-#     try:
-#         updateuser = Users.objects.get(pk=kwargs["id"])
-#         updateuser.is_deleted = True
-#         updateuser.save()
-#         data = UserSerializer(updateuser)
-#     except Users.DoesNotExist:
-#         return JsonResponse({"message": "User not found"}, status=404)
-#     except Exception as e:
-#         return JsonResponse({"message": "Couldn't delete data"}, status=400)
-#     return JsonResponse({"data": data, "message": "User deleted"}, status=200)
+@api_view(['PATCH'])
+@enable_disable
+def enable_artist(request,userid):
+    return {"is_artist": True}
 
+@api_view(['PATCH'])
+@enable_disable
+def disable_artist(request,userid):
+    return {"is_artist": False}
 
-
-# @csrf_exempt
-# def restore(request, **kwargs):
-#     try:
-#         updateuser = Users.objects.get(pk=kwargs["id"])
-#         updateuser.is_deleted = False
-#         updateuser.save()
-#         data = UserSerializer(updateuser)
-#     except Users.DoesNotExist:
-#         return JsonResponse({"message": "User not found"}, status=404)
-#     except Exception as e:
-#         return JsonResponse({"message":"Couldn't Restore Data"}, status=400)
-#     return JsonResponse({"data": data, "message": "User Restored" }, status=200)
-
-
-
+@api_view(['PATCH'])
+@enable_disable
+def disable_admin(request,userid):
+    return {"is_admin": False}
+@api_view(['PATCH'])
+@enable_disable
+def enable_admin(request,userid):
+    return {"is_admin": True}
 
 
 
