@@ -2,7 +2,8 @@ import django
 from .models import Album
 from django.views.decorators.csrf import csrf_exempt
 from .serializers import AlbumSerializer
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from .decorators import isArtist, isStaffOrArtist, isStaff
@@ -24,6 +25,7 @@ def enable_disable(func):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get(request):
     try:
         datas = Album.objects.filter(is_deleted=False)
@@ -37,6 +39,7 @@ def get(request):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def getAlbum(request,albumid):
     try:
         data = Album.objects.get(pk=albumid, is_deleted=False)
@@ -49,6 +52,7 @@ def getAlbum(request,albumid):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 @isArtist
 def add(request):
     serializer = AlbumSerializer(data=request.data)
@@ -61,6 +65,7 @@ def add(request):
 
 
 @api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
 @isArtist
 def edit(request, albumid):
     try:
@@ -75,6 +80,7 @@ def edit(request, albumid):
 
 
 @api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
 @isArtist
 @enable_disable
 def delete(request,albumid):
@@ -82,6 +88,7 @@ def delete(request,albumid):
 
 
 @api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
 @isArtist
 @enable_disable
 def restore(request,albumid):
@@ -89,6 +96,7 @@ def restore(request,albumid):
 
 
 @api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
 @isArtist
 @enable_disable
 def hide_album(request,albumid):
@@ -96,6 +104,7 @@ def hide_album(request,albumid):
 
 
 @api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
 @isArtist
 @enable_disable
 def show_album(request,albumid):
@@ -103,6 +112,7 @@ def show_album(request,albumid):
 
 
 @api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
 @isStaff
 @enable_disable
 def disable_album(request, albumid):
@@ -111,6 +121,7 @@ def disable_album(request, albumid):
 
 
 @api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
 @isStaff
 @enable_disable
 def enable_album(request, albumid):

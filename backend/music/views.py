@@ -3,8 +3,8 @@ from .models import Music
 from django.views.decorators.csrf import csrf_exempt
 from .serializers import MusicSerializer
 from .decorators import isArtist, isStaffOrArtist, isStaff
-
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -25,6 +25,7 @@ def enable_disable(func):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get(request):
     try:
         datas = list(Music.objects.filter(is_deleted=False))
@@ -36,6 +37,7 @@ def get(request):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def getUser(request,musicid):
     try:
         data = Music.objects.get(pk=musicid, is_deleted=False)
@@ -48,6 +50,7 @@ def getUser(request,musicid):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 @isArtist
 def add(request):
     
@@ -60,7 +63,7 @@ def add(request):
     
 
 
-@csrf_exempt
+@permission_classes([IsAuthenticated])
 @api_view(['PATCH'])
 @isArtist
 def edit(request,musicid):
@@ -74,23 +77,24 @@ def edit(request,musicid):
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@csrf_exempt
 @api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
 @isArtist
 @enable_disable
 def delete(request,musicid):
     return {"is_deleted": True}
 
 
-@csrf_exempt
 @api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
 @isArtist
 @enable_disable
 def restore(request,musicid):
     return {"is_deleted": False}
 
-@csrf_exempt
+
 @api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
 @isArtist
 @enable_disable
 def hide_music(request,musicid):
@@ -106,6 +110,7 @@ def show_music(request,musicid):
 
 
 @api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
 @isStaff
 @enable_disable
 def disable_music(request, musicid):
@@ -114,6 +119,7 @@ def disable_music(request, musicid):
 
 
 @api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
 @isStaff
 @enable_disable
 def enable_music(request, musicid):

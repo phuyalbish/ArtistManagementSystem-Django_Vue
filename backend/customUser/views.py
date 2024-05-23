@@ -4,11 +4,11 @@ from .models import Users
 from django.views.decorators.csrf import csrf_exempt
 from .serializers import UserSerializer
 from .decorators import isStaff, isAdmin
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-# from snippets.models import Snippet
-# from snippets.serializers import SnippetSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 
 
@@ -39,9 +39,10 @@ def enable_disable(func):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get(request):
     try:
-        datas = Users.objects.filter(is_deleted=False, is_superuser=False)
+        datas = Users.objects.filter(is_deleted=False, is_superuser=False, is_artist=True)
         serializer = UserSerializer(datas, many=True)
     except:
         return Response({"detail":"No User Found"}, status=404)
@@ -50,6 +51,7 @@ def get(request):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def getUser(request,userid):
     try:
         data = Users.objects.get(pk=userid, is_deleted=False, is_superuser=False)
@@ -60,8 +62,8 @@ def getUser(request,userid):
 
 
 
-
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def add(request):
     serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
@@ -73,6 +75,7 @@ def add(request):
 
 
 @api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
 def edit(request,userid):
     try:
         user = Users.objects.get(id=userid)
@@ -86,18 +89,21 @@ def edit(request,userid):
 
 
 @api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
 @enable_disable
 def delete(request,userid):
     return {"is_deleted": True}
 
 
 @api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
 @enable_disable
 def restore(request,userid):
     return {"is_deleted": False}
 
 
 @api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
 @isStaff
 @enable_disable
 def disable_user(request,userid):
@@ -105,6 +111,7 @@ def disable_user(request,userid):
 
 
 @api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
 @isStaff
 @enable_disable
 def enable_user(request,userid):
@@ -112,18 +119,21 @@ def enable_user(request,userid):
 
 
 @api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
 @isStaff
 @enable_disable
 def enable_artist(request,userid):
     return {"is_artist": True}
 
 @api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
 @isStaff
 @enable_disable
 def disable_artist(request,userid):
     return {"is_artist": False}
 
 @api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
 @isAdmin
 @enable_disable
 def disable_staff(request,userid):
@@ -131,6 +141,7 @@ def disable_staff(request,userid):
 
 
 @api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
 @isAdmin
 @enable_disable
 def enable_staff(request,userid):
