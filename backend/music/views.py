@@ -2,6 +2,7 @@ import django
 from .models import Music
 from django.views.decorators.csrf import csrf_exempt
 from .serializers import MusicSerializer
+from .decorators import isArtist, isStaffOrArtist, isStaff
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -26,7 +27,7 @@ def enable_disable(func):
 @api_view(['GET'])
 def get(request):
     try:
-        datas = list(Music.objects.values().filter(is_deleted=False, is_superuser=False))
+        datas = list(Music.objects.filter(is_deleted=False))
         serializer = MusicSerializer(datas, many=True)
     except:
         return Response({"detail":"No Music Found"}, status=404)
@@ -37,7 +38,7 @@ def get(request):
 @api_view(['GET'])
 def getUser(request,musicid):
     try:
-        data = Music.objects.values().get(pk=musicid, is_deleted=False, is_superuser=False)
+        data = Music.objects.get(pk=musicid, is_deleted=False)
         serializer = MusicSerializer(data, many=False)
     except:
         return Response({"detail":"No Music Found"}, status=404)
@@ -46,8 +47,8 @@ def getUser(request,musicid):
 
 
 
-@csrf_exempt
 @api_view(['POST'])
+@isArtist
 def add(request):
     
     serializer = MusicSerializer(data=request.data)
@@ -61,6 +62,7 @@ def add(request):
 
 @csrf_exempt
 @api_view(['PATCH'])
+@isArtist
 def edit(request,musicid):
     try:
         user = Music.objects.get(id=musicid)
@@ -74,6 +76,7 @@ def edit(request,musicid):
 
 @csrf_exempt
 @api_view(['PATCH'])
+@isArtist
 @enable_disable
 def delete(request,musicid):
     return {"is_deleted": True}
@@ -81,18 +84,37 @@ def delete(request,musicid):
 
 @csrf_exempt
 @api_view(['PATCH'])
+@isArtist
 @enable_disable
 def restore(request,musicid):
     return {"is_deleted": False}
 
 @csrf_exempt
 @api_view(['PATCH'])
+@isArtist
 @enable_disable
 def hide_music(request,musicid):
     return {"is_hidden": True}
 
 @csrf_exempt
 @api_view(['PATCH'])
+@isArtist
 @enable_disable
 def show_music(request,musicid):
     return {"is_hidden": False}
+
+
+
+@api_view(['PATCH'])
+@isStaff
+@enable_disable
+def disable_music(request, musicid):
+    return {"is_disabled": True}
+
+
+
+@api_view(['PATCH'])
+@isStaff
+@enable_disable
+def enable_music(request, musicid):
+    return {"is_disabled": False}

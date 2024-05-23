@@ -23,13 +23,13 @@ class  Users(AbstractBaseUser, PermissionsMixin):
     is_deleted = models.BooleanField(default=False)
     is_disabled = models.BooleanField(default=False)
     is_artist = models.BooleanField(default=False)
-    is_admin = models.BooleanField(default=False)
+    is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
-    is_active = None
+    is_active = models.BooleanField(default=False)
 
     objects = UserManager()
 
-    admin = 
+    # admin = 
 
     USERNAME_FIELD = 'email'
 

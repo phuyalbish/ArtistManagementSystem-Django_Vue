@@ -1,10 +1,9 @@
 
 import django
-from .models import Users, AccessToken
-from django.http import JsonResponse
+from .models import Users
 from django.views.decorators.csrf import csrf_exempt
 from .serializers import UserSerializer
-
+from .decorators import isStaff, isAdmin
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
@@ -20,7 +19,6 @@ def getCSRFToken(request):
     except:
         return Response({'detail':"Token Not Found"}, status=404)
     return Response({'token': token})
-
 
 
 
@@ -43,7 +41,7 @@ def enable_disable(func):
 @api_view(['GET'])
 def get(request):
     try:
-        datas = list(Users.objects.values().filter(is_deleted=False, is_superuser=False))
+        datas = Users.objects.filter(is_deleted=False, is_superuser=False)
         serializer = UserSerializer(datas, many=True)
     except:
         return Response({"detail":"No User Found"}, status=404)
@@ -54,7 +52,7 @@ def get(request):
 @api_view(['GET'])
 def getUser(request,userid):
     try:
-        data = Users.objects.values().get(pk=userid, is_deleted=False, is_superuser=False)
+        data = Users.objects.get(pk=userid, is_deleted=False, is_superuser=False)
         serializer = UserSerializer(data, many=False)
     except:
         return Response({"detail":"No User Found"}, status=404)
@@ -63,10 +61,8 @@ def getUser(request,userid):
 
 
 
-@csrf_exempt
 @api_view(['POST'])
 def add(request):
-    
     serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
@@ -76,7 +72,6 @@ def add(request):
     
 
 
-@csrf_exempt
 @api_view(['PATCH'])
 def edit(request,userid):
     try:
@@ -89,51 +84,57 @@ def edit(request,userid):
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@csrf_exempt
+
 @api_view(['PATCH'])
 @enable_disable
 def delete(request,userid):
     return {"is_deleted": True}
 
 
-@csrf_exempt
 @api_view(['PATCH'])
 @enable_disable
 def restore(request,userid):
     return {"is_deleted": False}
 
-@csrf_exempt
+
 @api_view(['PATCH'])
+@isStaff
 @enable_disable
 def disable_user(request,userid):
     return {"is_disabled": True}
 
-@csrf_exempt
+
 @api_view(['PATCH'])
+@isStaff
 @enable_disable
 def enable_user(request,userid):
     return {"is_disabled": False}
 
 
 @api_view(['PATCH'])
+@isStaff
 @enable_disable
 def enable_artist(request,userid):
     return {"is_artist": True}
 
 @api_view(['PATCH'])
+@isStaff
 @enable_disable
 def disable_artist(request,userid):
     return {"is_artist": False}
 
 @api_view(['PATCH'])
+@isAdmin
 @enable_disable
-def disable_admin(request,userid):
-    return {"is_admin": False}
-@api_view(['PATCH'])
-@enable_disable
-def enable_admin(request,userid):
-    return {"is_admin": True}
+def disable_staff(request,userid):
+    return {"is_staff": False}
 
+
+@api_view(['PATCH'])
+@isAdmin
+@enable_disable
+def enable_staff(request,userid):
+    return {"is_staff": True}
 
 
 

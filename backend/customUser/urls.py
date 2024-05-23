@@ -23,7 +23,7 @@ urlpatterns = [
     path('user/disable_user/<int:userid>/', views.disable_user, name="disable_user"),
     path('user/enable_artist/<int:userid>/', views.enable_artist, name="enable_artist"),
     path('user/disable_artist/<int:userid>/', views.disable_artist, name="disable_artist"),
-    path('user/enable_admin/<int:userid>/', views.enable_admin, name="enable_admin"),
-    path('user/disable_admin/<int:userid>/', views.disable_admin, name="disable_admin"),
+    path('user/enable_staff/<int:userid>/', views.enable_staff, name="enable_staff"),
+    path('user/disable_staff/<int:userid>/', views.disable_staff, name="disable_staff"),
 
    ]
