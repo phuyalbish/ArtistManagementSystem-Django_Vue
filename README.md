@@ -1,1 +1,0 @@
-# ArtistManagementSystem-Django_Vue

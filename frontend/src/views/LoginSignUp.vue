@@ -27,7 +27,7 @@
       </p>
       <div
         class="LoginSubmit bg-blue-800 py-2 px-4 rounded-full text-white shadow-blue-400 cursor-pointer hover:bg-white hover:text-blue-800 shadow-md"
-        @click="getAPI"
+        @click="LoginSubmit"
       >
         Login
       </div>
@@ -53,31 +53,19 @@
         class="outline-none p-2 flex-grow rounded-full overflow-hidden shadow-inner shadow-blue-400 text-blue-900"
         placeholder="Password"
         v-model="signUpData.password"
+        @focus="validatePassword"
       />
       <input
         type="password"
         class="outline-none p-2 flex-grow rounded-full overflow-hidden shadow-inner shadow-blue-400 text-blue-900"
         placeholder="re-type Password"
+        v-model="signUpData.repassword"
       />
       <input
         type="text"
         class="outline-none p-2 flex-grow rounded-full overflow-hidden shadow-inner shadow-blue-400 text-blue-900"
         placeholder="Full Name"
         v-model="signUpData.fname"
-      />
-
-       <input
-        type="text"
-        class="outline-none p-2 flex-grow rounded-full overflow-hidden shadow-inner shadow-blue-400 text-blue-900"
-        placeholder="Bio"
-        v-model="signUpData.bio"
-      />
-
-       <input
-        type="text"
-        class="outline-none p-2 flex-grow rounded-full overflow-hidden shadow-inner shadow-blue-400 text-blue-900"
-        placeholder="Link"
-        v-model="signUpData.link"
       />
       
       <div class="genderField  flex gap-6 outline-none p-3 flex-grow rounded-full overflow-hidden shadow-inner shadow-blue-400 text-blue-900">
@@ -124,8 +112,6 @@
 <script>
 const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=.*[^\w\d\s]).{8,}$/;
 import axios from 'axios';
-import { jwtDecode } from 'jwt-decode';
-import { errorMessages } from 'vue/compiler-sfc';
 export default{
         data(){
             return {
@@ -143,109 +129,107 @@ export default{
                 signUpData: {
                     email: "",
                     password: "",
+                    repassword:"",
                     fname:"",
-                    bio:"",
-                    link:"",
-                    gender:"Male",
-                    img_src:"default.jpg",
+                    // link:"",
+                    gender:"male",
+                    // img_src:"",
 
                 },
             }
         },
         mounted(){
-          console.log("loaded")
-
             if(this.refresh_token){
-              console.log(this.refresh_token)
-                axios.post(`${this.API}api/token/refresh/`, {"refresh": this.refresh_token}, {headers:{"content-Type": "application/json", }})
-                .then((response) => {
-                    console.log(response)
-                  if(response.status == 200){
-                      localStorage.setItem("access_token",response.data.access);
-                      this.$router.push('/dashboard')
-                      this.is_LoggedIn = true
-                  }
-                  }).catch(error => {
-                        this.is_errorOccured = error.response.data.detail
-                  })
+                axios.post(`${this.API}api/token/refresh/`, {}, {
+                headers: {
+                'RefreshToken': localStorage.getItem("refresh_token"),
+                "content-Type": "application/json",
+                }}).then(response =>{
+                    if(!this.access_token){
+                        localStorage.setItem("refresh_token",response.data.resData.refreshJWT);
+                        localStorage.setItem("access_token",response.data.resData.accessJWT);
+                    }
+                    if(response.status == 200){
+                        this.$router.push('/dashboard')
+                    }
+                })
             }
             else{
-                console.log("No Token Found!")
-                this.$router.push('/')
+                console.log("No Access Token Found")
             }
-
-          console.log("loadeddasd")
         },
 
          methods: {
+            LoginSubmit() {
 
 
-
-            async getAPI(){
               if(this.loginData.email && this.loginData.password){
-                await axios.post(`${this.API}api/token/`, this.loginData, {headers:{"content-Type": "application/json", }})
-                .then((response) => {
+                
+                axios
+                  .post(`${this.API}api/logins/`, this.loginData, {
+                    headers: {
+                    "content-Type": "application/json",
+                    },
+                  })
+                  .then((response) => {
                     console.log(response)
                   if(response.status == 200){
-                      localStorage.setItem("refresh_token",response.data.refresh);
-                      localStorage.setItem("access_token",response.data.access);
-                      let data = jwtDecode(response.data.access)
-                      localStorage.setItem("Userid", data.user_id)
+                      localStorage.setItem("refresh_token",response.data.jwt.refreshJWT);
+                      localStorage.setItem("access_token",response.data.jwt.accessJWT);
                       this.$router.push('/dashboard')
                       this.is_LoggedIn = true
                   }
                   }).catch(error => {
-                        this.is_errorOccured = error.response.data.detail
+                        this.is_errorOccured = error.response.data
                   })
                 }
                 else{
-                   this.is_errorOccured="Fields are required"
+                    this.is_errorOccured = "Enter the fields"
                 }
-
-            },
-
-    RegisterSubmit() {
-      if(this.loginData.email != "" && this.loginData.password != ""){
-        axios.post(`${this.API}api/user/add/`,JSON.stringify(this.signUpData) , {
-            headers: {
-            "content-Type": "application/json",
-            }
-          }).then(response => {
-          if(response.status == 200){
-              console.log(response)
-              axios.post(`${this.API}api/token/`, {"email": this.signUpData.email, "password": this.signUpData.password }, {headers:{"content-Type": "application/json", }})
-              .then((response) => {
-                  console.log(response)
-                if(response.status == 200){
-                    localStorage.setItem("refresh_token",response.data.refresh);
-                    localStorage.setItem("access_token",response.data.access);
-                      let data = jwtDecode(response.data.access)
-                      localStorage.setItem("Userid", data.user_id)
-                    this.is_LoggedIn = true
-                    this.$router.push('/dashboard')
-                }
-                }).catch(error => {
-                      this.is_errorOccured = error.response
-                })
-            }
-          }).catch(err => {
-            console.log(err.response)
-          });
-      }
-      else{
-        this.is_errorOccured="Fields are required"
-      }
+        
     },
 
 
+    // Register..................
+    validatePassword(){
+          if (passwordRegex.test(this.signUpData.password)){
+                if(this.signUpData.repassword == this.signUpData.password){
+                  this.is_errorOccured = "as"
+                }
+          }
+          else{
+            this.is_errorOccured =="Password must contain atleast 8 characte of 1 Uppercase and 1 Numeric"
+          }
+
+    },
+
+    RegisterSubmit() {
+      axios({
+        method: "post",
+        url: `${this.API}api/register/`,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        data: this.signUpData,
+      }).then(response => {
+        console.log(response)
+        if(response.status == 200){
+                      localStorage.setItem("refresh_token",response.data.refreshJWT);
+                      localStorage.setItem("access_token",response.data.accessJWT);
+                      this.$router.push('/dashboard')
+        }
+      }).catch(err => {
+        console.log(err.response.data)
+      });
+    },
     ToggleLoginDiv() {
       this.is_shownSignUpForm = false;
-      this.is_errorOccured="";
+      this.is_errorOccured = "";
       this.is_shownLoginForm = !this.is_shownLoginForm;
     },
     ToggleSignUpDiv() {
       this.is_shownLoginForm = false;
-      this.is_errorOccured="";
+      this.is_errorOccured = "";
       this.is_shownSignUpForm = !this.is_shownSignUpForm;
     },
 }
