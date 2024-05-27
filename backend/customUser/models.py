@@ -11,9 +11,9 @@ class AccessToken(models.Model):
 class  Users(AbstractBaseUser, PermissionsMixin):
     username: None
     email = models.CharField(max_length=50, null=False, unique=True)
-    fname = models.CharField(max_length=50, null=False)
+    fname = models.CharField(max_length=50,  null=False)
     bio = models.CharField(max_length=200, null=True)
-    link = models.CharField(max_length=100, null=True)
+    links = models.CharField(max_length=100, null=True)
     gender = models.CharField(max_length=100, default="Male")
     img_src = models.CharField(max_length=100, default="default_user.png")
     modified_by = models.CharField(max_length=50, null=True)
@@ -33,7 +33,7 @@ class  Users(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = 'email'
 
-    REQUIRED_FIELD = []
+    REQUIRED_FIELD = ['fname', 'bio', 'link']
 
     def __str__(self):  
         return self.email

@@ -4,7 +4,7 @@ from album.models import Album
 class Music(models.Model):
     name=models.CharField(max_length=50, null=False)
     img_src=models.CharField(max_length=100, null="default_album.png")
-    artist=models.ForeignKey(Users, on_delete=models.CASCADE)
+    artist=models.ForeignKey(Users, on_delete=models.CASCADE, related_name='music')
     album=models.ForeignKey(Album, null=True, on_delete=models.CASCADE)
     is_hidden=models.BooleanField(default=False)
     is_deleted=models.BooleanField(default=False)

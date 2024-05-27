@@ -124,3 +124,21 @@ def disable_music(request, musicid):
 @enable_disable
 def enable_music(request, musicid):
     return {"is_disabled": False}
+
+
+
+
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getUserSpecificMusic(request, userid):
+    try:
+        datas = Music.objects.filter(artist=userid, is_deleted=False)
+        # user = User.get(pk=request.user_id)
+        # user.album.all()
+        serializer = MusicSerializer(datas, many=True)
+    except:
+        return Response({"detail":"No Album Found"}, status=404)
+    return Response(serializer.data)
+    

@@ -1,8 +1,7 @@
 <script>
-// import axios from "axios";
-// import store from "@/store/store";
-// import { mapGetters } from "vuex";
-import Profile from '../pages/Profile.vue'
+import store from "@/store/store";
+
+import { mapState } from "vuex";
 export default {
   components: {},
   props:[
@@ -10,23 +9,27 @@ export default {
   ],
   data() {
     return {
-      userData:"",
       articleData:"",
+      imgSrc:"",
       searchName: "",
       is_openPopupSideBar: false,
       is_showSearchPopUp: false,
     };
   },
 
-computed:{
-//  getData(){
-//     return store.getters.getUserData
-//  }
-},
+  computed:{
+      ...mapState(['userData']),
+      
+  },
+  mounted(){
+
+      this.$store.dispatch('setUserData'),
+      this.$store.dispatch('setMusicData'),
+      this.$store.dispatch('setAlbumData'),
+      this.$store.dispatch('setArtistData')
+  },
   watch: {
-    getData(newVal){
-        this.userData = newVal.resData
-    },
+   
     searchName(newVal) {
       if (newVal == "") {
         this.is_showSearchPopUp = false;
@@ -40,7 +43,8 @@ computed:{
     logOut(){
          localStorage.removeItem("refresh_token");
          localStorage.removeItem("access_token");
-         this.$router.push('/')
+         localStorage.removeItem("userId");
+         this.$router.push('/login')
     },
     searchArticles() {
       console.log(this.searchName);
@@ -62,11 +66,11 @@ computed:{
 </script>
 <template>
   <div
-    class="header flex flex-wrap gap-4 items-center p-5 justify-between sm:justify-evenly"
+    class="header z-20 flex flex-wrap gap-4 items-center p-5 justify-between sm:justify-evenly"
   >
     <RouterLink to="/dashboard" class="headerTitleAndTag flex flex-col align-middle">
       <div class="headerTitle text-2xl text-blue-900 font-mono">
-        Musica
+        Musicà
       </div>
       <div class="headerTag text-xs text-slate-500">
         Place for music
@@ -100,8 +104,8 @@ computed:{
       @click="openClosePopupSideBar"
     >  
         <button type="button" class="relative flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
-        
-        <img class="h-8 w-8 rounded-full" src="../assets/default_profile.png" alt="">
+        <!-- {{ this.$store.state.userData }} -->
+        <img class="h-8 w-8 rounded-full" :src="'../assets/'+userData.img_src" alt="">
         </button>
     </div>
     <div

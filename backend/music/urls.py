@@ -17,5 +17,8 @@ urlpatterns = [
     path('music/hide_music/<int:musicid>/', views.show_music, name="hide_music"),
     path('music/disable_music/<int:musicid>/', views.disable_music, name="disable_music"),
     path('music/enable_music/<int:musicid>/', views.enable_music, name="enable_music"),
+
+
+    path('music/get/user/<int:userid>/', views.getUserSpecificMusic, name="getUserSpecificMusic"),
    ]
 

@@ -37,7 +37,7 @@
     </div>
 
     <div
-      v-if="is_shownSignUpForm"
+      v-if="!is_shownLoginForm"
       class="LoginInSignUp z-50 flex flex-col items-center m-10 gap-4 p-10 md:w-4/6 border bg-white rounded-lg shadow-md shadow-blue-400"
     >
       <h3 class="text-2xl text-blue-900">Create New Account</h3>
@@ -48,6 +48,18 @@
         placeholder="Email"
         v-model="signUpData.email"
       />
+
+      <input
+        type="text"
+        class="outline-none p-2 flex-grow rounded-full overflow-hidden shadow-inner shadow-blue-400 text-blue-900"
+        placeholder="Full Name"
+        v-model="signUpData.fname"
+      />
+      
+      <textarea class="outline-none p-2 resize-none flex-grow rounded-md overflow-hidden shadow-inner shadow-blue-400 text-blue-900"
+        id="w3review" name="w3review" rows="3" cols="25"
+         placeholder="Bio"
+        v-model="signUpData.bio"></textarea>
       <input
         type="password"
         class="outline-none p-2 flex-grow rounded-full overflow-hidden shadow-inner shadow-blue-400 text-blue-900"
@@ -61,18 +73,11 @@
         placeholder="re-type Password"
         v-model="signUpData.repassword"
       />
-      <input
-        type="text"
-        class="outline-none p-2 flex-grow rounded-full overflow-hidden shadow-inner shadow-blue-400 text-blue-900"
-        placeholder="Full Name"
-        v-model="signUpData.fname"
-      />
-      
       <div class="genderField  flex gap-6 outline-none p-3 flex-grow rounded-full overflow-hidden shadow-inner shadow-blue-400 text-blue-900">
               <label for="male"><input
         type="radio"
         id="male"
-        value="male"
+        value="Male"
         name="gender"
         v-model="signUpData.gender"
       /> 
@@ -82,13 +87,13 @@
        <input
         type="radio"
         id="male"
-        value="female"
-        name="gender" selected="selected"
+        value="Female"
+        name="gender"
+        selected="selected"
         v-model="signUpData.gender" 
       /> 
        Female</label>
       </div>
-
 
          
       <p
@@ -110,8 +115,10 @@
     </div>
 </template>
 <script>
-const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=.*[^\w\d\s]).{8,}$/;
+// const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=.*[^\w\d\s]).{8,}$/;
 import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
+import { mapActions } from 'vuex';
 export default{
         data(){
             return {
@@ -119,9 +126,7 @@ export default{
                 refresh_token :localStorage.getItem("refresh_token"),
                 API: "http://127.0.0.1:8000/",
                 is_errorOccured : "",
-                is_shownSignUpForm : false,
                 is_shownLoginForm :true,
-                is_LoggedIn: false,
                 loginData: {
                     email: "",
                     password: "",
@@ -131,82 +136,84 @@ export default{
                     password: "",
                     repassword:"",
                     fname:"",
-                    // link:"",
-                    gender:"male",
+                    bio:"",
+                    link:"",
+                    gender:"Male",
                     // img_src:"",
 
                 },
             }
         },
         mounted(){
-            if(this.refresh_token){
-                axios.post(`${this.API}api/token/refresh/`, {}, {
+            if(this.refresh_token & !this.access_token){
+                axios.post(`${this.API}api/token/refresh/`, {'refresh': localStorage.getItem("refresh_token")}, {
                 headers: {
-                'RefreshToken': localStorage.getItem("refresh_token"),
                 "content-Type": "application/json",
                 }}).then(response =>{
                     if(!this.access_token){
-                        localStorage.setItem("refresh_token",response.data.resData.refreshJWT);
-                        localStorage.setItem("access_token",response.data.resData.accessJWT);
+                        localStorage.setItem("refresh_token",response.data.refresh);
+                        localStorage.setItem("access_token",response.data.access);
+                        let data = jwtDecode(response.data.access)
+                        console.log(data.user_id)
+                        localStorage.setItem("userId", data.user_id)
                     }
                     if(response.status == 200){
                         this.$router.push('/dashboard')
                     }
                 })
             }
-            else{
-                console.log("No Access Token Found")
-            }
+        },
+        watch:{
+          gender(){
+              console.log(this.signUpData.gender)
+          }
         },
 
          methods: {
             LoginSubmit() {
 
-
               if(this.loginData.email && this.loginData.password){
                 
                 axios
-                  .post(`${this.API}api/logins/`, this.loginData, {
+                  .post(`${this.API}api/token/`, this.loginData, {
                     headers: {
                     "content-Type": "application/json",
                     },
                   })
                   .then((response) => {
-                    console.log(response)
                   if(response.status == 200){
-                      localStorage.setItem("refresh_token",response.data.jwt.refreshJWT);
-                      localStorage.setItem("access_token",response.data.jwt.accessJWT);
+                      localStorage.setItem("refresh_token",response.data.refresh);
+                      localStorage.setItem("access_token",response.data.access);
+                      let data = jwtDecode(response.data.access)
+                        localStorage.setItem("userId", data.user_id)
+                    console.log(data.user_id)
+                       this.$store.dispatch('setUserData')
                       this.$router.push('/dashboard')
-                      this.is_LoggedIn = true
                   }
-                  }).catch(error => {
-                        this.is_errorOccured = error.response.data
+                  else if(response.status == 401){
+                    this.is_errorOccured = response.detail
+                  }
+                  })
+                  .catch(error => {
+                      // if(error){
+                        this.is_errorOccured = error.response.data.detail
+                      // }
                   })
                 }
                 else{
-                    this.is_errorOccured = "Enter the fields"
+                    this.is_errorOccured = "Field is required"
                 }
+
+
+
         
     },
 
 
-    // Register..................
-    validatePassword(){
-          if (passwordRegex.test(this.signUpData.password)){
-                if(this.signUpData.repassword == this.signUpData.password){
-                  this.is_errorOccured = "as"
-                }
-          }
-          else{
-            this.is_errorOccured =="Password must contain atleast 8 characte of 1 Uppercase and 1 Numeric"
-          }
-
-    },
-
     RegisterSubmit() {
       axios({
         method: "post",
-        url: `${this.API}api/register/`,
+        url: `${this.API}api/user/add/`,
         headers: {
           "Content-Type": "application/json",
         },
@@ -214,23 +221,46 @@ export default{
       }).then(response => {
         console.log(response)
         if(response.status == 200){
-                      localStorage.setItem("refresh_token",response.data.refreshJWT);
-                      localStorage.setItem("access_token",response.data.accessJWT);
+              axios.post(`${this.API}api/token/`,{
+                'email':this.signUpData.email,
+                'password': this.signUpData.password
+              }, {
+                    headers: {
+                    "content-Type": "application/json",
+                    },
+                  })
+                  .then((response) => {
+                  if(response.status == 200){
+                      localStorage.setItem("refresh_token",response.data.refresh);
+                      localStorage.setItem("access_token",response.data.access);
+                      let data = jwtDecode(response.data.access)
+                        localStorage.setItem("userId", data.user_id)
+                    console.log(data.user_id)
+                       this.$store.dispatch('setUserData')
                       this.$router.push('/dashboard')
+                  }
+                  else if(response.status == 401){
+                    this.is_errorOccured = response.detail
+                  }
+                  })
+                  .catch(error => {
+                        this.is_errorOccured = error.response.data.detail
+                      
+                  })
+
         }
       }).catch(err => {
         console.log(err.response.data)
+      this.is_errorOccured = err.response.data;
       });
     },
     ToggleLoginDiv() {
-      this.is_shownSignUpForm = false;
       this.is_errorOccured = "";
-      this.is_shownLoginForm = !this.is_shownLoginForm;
+      this.is_shownLoginForm = true;
     },
     ToggleSignUpDiv() {
-      this.is_shownLoginForm = false;
       this.is_errorOccured = "";
-      this.is_shownSignUpForm = !this.is_shownSignUpForm;
+      this.is_shownLoginForm = false;
     },
 }
 

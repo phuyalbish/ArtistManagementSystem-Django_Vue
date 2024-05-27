@@ -17,6 +17,9 @@ urlpatterns = [
     path('user/get/<int:userid>/', views.getUser, name="getUser"),
     path('user/add/', views.add, name="add"),
     path('user/edit/<int:userid>/', views.edit, name="edit"),
+    path('user/edit/super/<int:userid>/', views.editSuperUser, name="editSuperUser"),
+
+    
     path('user/delete/<int:userid>/', views.delete, name="delete"),
     path('user/restore/<int:userid>/', views.restore, name="restore"),
     path('user/enable_user/<int:userid>/', views.enable_user, name="enable_user"),
@@ -25,5 +28,7 @@ urlpatterns = [
     path('user/disable_artist/<int:userid>/', views.disable_artist, name="disable_artist"),
     path('user/enable_staff/<int:userid>/', views.enable_staff, name="enable_staff"),
     path('user/disable_staff/<int:userid>/', views.disable_staff, name="disable_staff"),
+
+
 
    ]

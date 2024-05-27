@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
+    'corsheaders',
     'album',
     'customUser',
     'music',
@@ -55,7 +56,7 @@ INSTALLED_APPS = [
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173/'
+    'http://localhost:5173'
 ]
 CORS_ALLOW_METHODS = (
     "DELETE",
@@ -67,13 +68,13 @@ CORS_ALLOW_METHODS = (
 )
 CORS_ALLOW_HEADERS = (
     # "accept",
-    "authorization",
+    "Authorization",
+    "Userid",
     "content-type",
     # "user-agent",
-    # "x-csrftoken",
+    "x-csrftoken",
     # "x-requested-with",
     # 'access_token',
-    'RefreshToken',
 )
 
 
@@ -178,6 +179,7 @@ REST_FRAMEWORK = {
 
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
+    
 }
 
 SIMPLE_JWT = {

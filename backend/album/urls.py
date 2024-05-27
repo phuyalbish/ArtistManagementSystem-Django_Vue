@@ -17,5 +17,13 @@ urlpatterns = [
     path('album/hide_album/<int:albumid>/', views.show_album, name="hide_album"),
     path('album/disable_album/<int:albumid>/', views.disable_album, name="disable_album"),
     path('album/enable_album/<int:albumid>/', views.enable_album, name="enable_album"),
+
+
+
+
+
+    path('album/get/user/<int:userid>/', views.getUserSpecificAlbum, name="getUserSpecificAlbum"),
+
+    
    ]
 

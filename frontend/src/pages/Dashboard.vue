@@ -13,15 +13,12 @@
 <script>
 import  MusicTiles from '../components/Tiles/MusicTiles.vue'
 export default{
-data(){
-        return{
-            id : this.$route.params.id
-        }
-    },
+
   components:{
     MusicTiles
+  },
+  mounted(){
   }
-
 }
 
 </script>

@@ -35,6 +35,24 @@ def get(request):
     except:
         return Response({"detail":"No Album Found"}, status=404)
     return Response(serializer.data)
+
+
+
+
+
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getUserSpecificAlbum(request, userid):
+    try:
+        datas = Album.objects.filter(artist=userid, is_deleted=False)
+        # user = User.get(pk=request.user_id)
+        # user.album.all()
+        serializer = AlbumSerializer(datas, many=True)
+    except:
+        return Response({"detail":"No Album Found"}, status=404)
+    return Response(serializer.data)
     
 
 
